@@ -1,0 +1,60 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Flask
+instance/
+.webassets-cache
+app.db
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+site.db
+
+# Virtual environment
+venv/
+env/
+ENV/
+.env
+.venv
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+*.sublime-workspace
+
+# Project-specific folders with user uploads
+signed_documents/
+signatory_documents/
+safe_documents/
+
+# Certificates and keys
+*.pem
+*.key
+*.cert
+
+# Log files
+*.log
+logs/
+
+# Environment variables
+.env
+.flaskenv
+
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/ 

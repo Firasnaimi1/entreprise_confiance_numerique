@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Signature Confirmée{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header bg-success text-white">
+            <h3><i class="fa fa-check-circle"></i> Signature confirmée</h3>
+        </div>
+        <div class="card-body text-center">
+            <div class="mb-4">
+                <i class="fa fa-check-circle fa-5x text-success"></i>
+            </div>
+            <h4 class="mb-3">Merci d'avoir signé le document!</h4>
+            <p class="lead">Le document "{{ process.title }}" a été signé avec succès.</p>
+            <p>Date de signature: {{ signer.signature_date.strftime('%d/%m/%Y à %H:%M') }}</p>
+            
+            {% if process.workflow_type == 'sequential' %}
+                {% set next_signer = false %}
+                {% set found_current = false %}
+                {% for s in process.signers %}
+                    {% if found_current and s.status == 'pending' and not next_signer %}
+                        {% set next_signer = s %}
+                    {% endif %}
+                    {% if s.id == signer.id %}
+                        {% set found_current = true %}
+                    {% endif %}
+                {% endfor %}
+                
+                {% if next_signer %}
+                <div class="alert alert-info mt-3">
+                    <p>Le document est maintenant en attente de signature par {{ next_signer.name }}.</p>
+                </div>
+                {% endif %}
+            {% endif %}
+            
+            {% if process.status == 'completed' %}
+            <div class="alert alert-success mt-3">
+                <h5><i class="fa fa-trophy"></i> Processus de signature complété!</h5>
+                <p>Tous les signataires ont signé le document.</p>
+            </div>
+            {% endif %}
+        </div>
+        <div class="card-footer text-center">
+            <p class="text-muted small">Un e-mail de confirmation a été envoyé à votre adresse.</p>
+            <p class="text-muted small">Numéro de référence: {{ process.id }}-{{ signer.id }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %} 

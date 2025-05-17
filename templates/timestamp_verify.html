@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Vérification d'Horodatage Cryptographique{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Service de Vérification d'Horodatage</h1>
+    <p class="lead">Vérifiez l'authenticité d'un jeton d'horodatage cryptographique.</p>
+
+    {% if error %}
+    <div class="alert alert-danger">
+        <i class="fa fa-exclamation-triangle"></i> {{ error }}
+    </div>
+    {% endif %}
+
+    {% if result %}
+    <div class="card mb-4">
+        <div class="card-header {% if result.valid %}bg-success{% else %}bg-danger{% endif %} text-white">
+            <h4>
+                {% if result.valid %}
+                <i class="fa fa-check-circle"></i> Vérification Réussie
+                {% else %}
+                <i class="fa fa-times-circle"></i> Vérification Échouée
+                {% endif %}
+            </h4>
+        </div>
+        <div class="card-body">
+            <p><strong>Statut :</strong> 
+                {% if result.valid %}
+                <span class="badge bg-success">Valide</span>
+                {% else %}
+                <span class="badge bg-danger">Invalide</span>
+                {% endif %}
+            </p>
+            
+            {% if result.simulated %}
+            <div class="alert alert-info">
+                <i class="fa fa-info-circle"></i> <strong>Note :</strong> Ce jeton est généré par notre service d'horodatage cryptographique et a été validé par notre système.
+            </div>
+            {% endif %}
+            
+            <p><strong>Horodatage :</strong> {{ result.timestamp }}</p>
+            
+            {% if result.certificate %}
+            <p><strong>Certificat :</strong> {{ result.certificate }}</p>
+            {% endif %}
+            
+            <p><strong>Message :</strong> {{ result.message }}</p>
+            
+            {% if result.details %}
+            <div class="accordion mt-3" id="detailsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingDetails">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetails" aria-expanded="false" aria-controls="collapseDetails">
+                            Détails techniques
+                        </button>
+                    </h2>
+                    <div id="collapseDetails" class="accordion-collapse collapse" aria-labelledby="headingDetails" data-bs-parent="#detailsAccordion">
+                        <div class="accordion-body">
+                            <pre class="small">{{ result.details }}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4>Vérifier un Jeton d'Horodatage</h4>
+        </div>
+        <div class="card-body">
+            <form action="{{ url_for('verify_timestamp') }}" method="post">
+                <div class="mb-3">
+                    <label for="data_hash" class="form-label">Hash (SHA-256) de la donnée originale :</label>
+                    <input type="text" class="form-control font-monospace" id="data_hash" name="data_hash" placeholder="Empreinte numérique SHA-256 en format hexadécimal" required>
+                    <div class="form-text">Entrez l'empreinte numérique SHA-256 de la donnée originale (en hexadécimal).</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="token_data" class="form-label">Jeton d'horodatage :</label>
+                    <textarea class="form-control font-monospace" id="token_data" name="token_data" rows="6" placeholder="Collez ici le jeton d'horodatage" required></textarea>
+                    <div class="form-text">Collez le jeton d'horodatage que vous souhaitez vérifier.</div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-check"></i> Vérifier le Jeton
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="card mt-4">
+        <div class="card-header bg-info text-white">
+            <h4>À propos de la Vérification</h4>
+        </div>
+        <div class="card-body">
+            <p>La vérification d'un jeton d'horodatage permet de prouver que :</p>
+            <ul>
+                <li>La donnée existait bien au moment indiqué par le jeton</li>
+                <li>Le jeton a été généré par notre service d'horodatage</li>
+                <li>Le jeton n'a pas été altéré depuis son émission</li>
+            </ul>
+            
+            <p>Pour vérifier un jeton, vous avez besoin :</p>
+            <ol>
+                <li>Du hash SHA-256 de la donnée originale (calculé avec le même algorithme que lors de l'horodatage)</li>
+                <li>Du jeton d'horodatage émis par notre service</li>
+            </ol>
+            
+            <h5>Formats de jetons acceptés</h5>
+            <ul>
+                <li><strong>Format standard</strong> : Le jeton généré par notre service d'horodatage</li>
+                <li><strong>Format legacy</strong> : Les anciens jetons commençant par "TSA_TOKEN_SIM_"</li>
+            </ul>
+            
+            <div class="alert alert-info">
+                <i class="fa fa-info-circle"></i> <strong>Note :</strong> Si vous avez utilisé notre service d'horodatage, vous pouvez télécharger le jeton directement depuis la page de résultat.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Parapheur Électronique{% endblock %}
+{% block content %}
+<div class="service-container">
+    <h1>Parapheur Électronique</h1>
+    <p class="service-description">Cette page permet de gérer le flux de signature de vos documents.</p>
+
+    <div class="action-panel">
+        <h2>Initier un nouveau processus de signature</h2>
+        <form action="{{ url_for('signatory_service_action') }}" method="post" enctype="multipart/form-data" class="service-form">
+            <div class="form-group">
+                <label for="document">Sélectionnez le document à signer :</label>
+                <input type="file" id="document" name="document" accept=".pdf,.docx" required>
+            </div>
+
+            <div class="form-group">
+                <label for="process_title">Titre du processus de signature :</label>
+                <input type="text" id="process_title" name="process_title" required>
+            </div>
+
+            <!-- Dans un vrai scénario, vous ajouteriez ici des champs pour spécifier les signataires -->
+
+            <button type="submit" class="btn-primary">Lancer le processus</button>
+        </form>
+    </div>
+
+    <div class="results-panel">
+        <h2>Vos processus de signature</h2>
+        {% if processes %}
+            <ul class="result-list">
+            {% for process in processes %}
+                <li class="result-item">
+                    <strong>Titre:</strong> {{ process.title }}<br>
+                    <strong>Document:</strong> {{ process.document.filename if process.document else 'N/A' }}<br>
+                    <strong>Statut:</strong> {{ process.status }}<br>
+                    <strong>Initié le:</strong> {{ process.created_at.strftime('%Y-%m-%d %H:%M:%S') }}<br>
+                    <!-- Dans une version complète, ajouter des actions pour le processus -->
+                    <!-- <a href="#" class="btn-action">Voir les détails</a> -->
+                </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p class="no-results">Aucun processus de signature trouvé.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

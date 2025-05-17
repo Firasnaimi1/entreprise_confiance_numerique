@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Détails du Processus de Signature{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Processus de Signature: {{ process.title }}</h1>
+    
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h4>Informations du Processus</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Statut:</strong> 
+                        <span class="badge 
+                            {% if process.status == 'pending' %}bg-warning{% endif %}
+                            {% if process.status == 'in_progress' %}bg-info{% endif %}
+                            {% if process.status == 'completed' %}bg-success{% endif %}
+                            {% if process.status == 'cancelled' %}bg-danger{% endif %}
+                        ">
+                            {{ process.status }}
+                        </span>
+                    </p>
+                    <p><strong>Créé le:</strong> {{ process.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
+                    {% if process.completed_at %}
+                    <p><strong>Complété le:</strong> {{ process.completed_at.strftime('%d/%m/%Y %H:%M') }}</p>
+                    {% endif %}
+                    <p><strong>Type de workflow:</strong> {{ process.workflow_type }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Document:</strong> {{ document.filename }}</p>
+                    <p><strong>Hash original:</strong> {{ document.original_hash[:16] }}...</p>
+                    {% if process.signed_document_path %}
+                    <a href="{{ url_for('download_signatory_document', process_id=process.id) }}" class="btn btn-success">
+                        <i class="fa fa-download"></i> Télécharger le document signé
+                    </a>
+                    {% endif %}
+                    {% if process.audit_trail %}
+                    <a href="{{ url_for('download_audit_trail', process_id=process.id) }}" class="btn btn-info mt-2">
+                        <i class="fa fa-list-alt"></i> Télécharger la piste d'audit
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h4>Signataires</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Rôle</th>
+                            <th>Ordre</th>
+                            <th>Statut</th>
+                            <th>Date de signature</th>
+                            <th>Lien de signature</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for signer in signers %}
+                        <tr>
+                            <td>{{ signer.name }}</td>
+                            <td>{{ signer.role }}</td>
+                            <td>{{ signer.order + 1 }}</td>
+                            <td>
+                                <span class="badge 
+                                    {% if signer.status == 'pending' %}bg-warning{% endif %}
+                                    {% if signer.status == 'signed' %}bg-success{% endif %}
+                                    {% if signer.status == 'refused' %}bg-danger{% endif %}
+                                    {% if signer.status == 'notified' %}bg-info{% endif %}
+                                ">
+                                    {{ signer.status }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if signer.signature_date %}
+                                {{ signer.signature_date.strftime('%d/%m/%Y %H:%M') }}
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% for link in signing_links %}
+                                    {% if link.name == signer.name %}
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" value="{{ link.url }}" id="link-{{ signer.id }}" readonly>
+                                        <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('link-{{ signer.id }}')">
+                                            <i class="fa fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <a href="{{ url_for('signatory_service_page') }}" class="btn btn-secondary">
+            <i class="fa fa-arrow-left"></i> Retour
+        </a>
+    </div>
+</div>
+
+<script>
+function copyToClipboard(elementId) {
+    var copyText = document.getElementById(elementId);
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
+    document.execCommand("copy");
+    
+    // Show feedback
+    var btn = copyText.nextElementSibling;
+    var originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa fa-check"></i> Copié!';
+    setTimeout(function() {
+        btn.innerHTML = originalText;
+    }, 2000);
+}
+</script>
+{% endblock %} 

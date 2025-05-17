@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Génération et Gestion de Certificats{% endblock %}
+{% block content %}
+<div class="service-container">
+    <h1>Génération et Gestion de Certificats</h1>
+    <p class="service-description">Cette page permet de générer et gérer des certificats numériques.</p>
+
+    <div class="action-panel">
+        <h2>Générer un nouveau certificat</h2>
+        <form action="{{ url_for('certificates_service_action') }}" method="post" class="service-form">
+            <div class="form-group">
+                <label for="subject_name">Nom du sujet (par exemple, votre nom ou organisation) :</label>
+                <input type="text" id="subject_name" name="subject_name" required>
+            </div>
+            <button type="submit" class="btn-primary">Générer le certificat</button>
+        </form>
+    </div>
+
+    <div class="results-panel">
+        <h2>Vos certificats</h2>
+        {% if certificates %}
+            <ul class="result-list">
+            {% for cert in certificates %}
+                <li class="result-item">
+                    <strong>Sujet:</strong> {{ cert.subject }}<br>
+                    <strong>Émis le:</strong> {{ cert.issued_at.strftime('%Y-%m-%d %H:%M:%S') }}<br>
+                    {% if cert.expires_at %}
+                    <strong>Expire le:</strong> {{ cert.expires_at.strftime('%Y-%m-%d %H:%M:%S') }}<br>
+                    {% endif %}
+                    <strong>Émetteur:</strong> {{ cert.issuer }}<br>
+                    <a href="{{ url_for('download_certificate', cert_id=cert.id) }}" class="btn-download">Télécharger le certificat</a>
+                </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p class="no-results">Aucun certificat trouvé.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accueil - Services de Confiance Numérique</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>TrustSecure Solutions</h1>
+    </header>
+    <nav>
+        <a href="{{ url_for('index') }}">Accueil</a>
+        <a href="{{ url_for('services') }}">Nos Services</a>
+        {% if session.username %}
+            <a href="{{ url_for('dashboard') }}">Tableau de Bord</a>
+            <a href="{{ url_for('logout') }}">Déconnexion ({{ session.name }})</a>
+        {% else %}
+            <a href="{{ url_for('login') }}">Connexion</a>
+        {% endif %}
+    </nav>
+
+    <div class="container">
+        <section class="hero">
+            <h2>Bienvenue sur notre plateforme de confiance numérique</h2>
+            <p>Nous fournissons des solutions sécurisées et fiables pour vos besoins numériques.</p>
+            <a href="{{ url_for('services') }}" class="btn">Découvrir nos services</a>
+        </section>
+
+        <section class="features">
+            <div class="feature-item">
+                <h3>Signature Électronique</h3>
+                <p>Signez vos documents importants en ligne avec une validité légale.</p>
+            </div>
+            <div class="feature-item">
+                <h3>Horodatage Qualifié</h3>
+                <p>Prouvez l'existence et l'intégrité de vos fichiers à un instant précis.</p>
+            </div>
+            <div class="feature-item">
+                <h3>Identité Numérique</h3>
+                <p>Vérifiez et gérez les identités numériques de manière sécurisée.</p>
+            </div>
+        </section>
+
+        <section style="text-align: center;">
+            <h2>Prêt à commencer ?</h2>
+            <p>Créez un compte ou connectez-vous pour accéder à nos services.</p>
+            {% if not session.username %}
+                <a href="{{ url_for('login') }}" class="btn">Se connecter / S'inscrire</a>
+            {% endif %}
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Services de Confiance Numérique. Tous droits réservés.</p>
+    </footer>
+</body>
+</html>

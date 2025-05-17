@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Service d'Horodatage Cryptographique{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Service d'Horodatage Cryptographique</h1>
+    <p class="lead">Notre service d'horodatage utilise un système de signature cryptographique pour certifier l'existence d'un document ou d'une donnée à un instant précis.</p>
+
+    {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+
+    {% if message %}
+    <div class="alert alert-success">{{ message }}</div>
+    {% endif %}
+
+    {% if timestamp_details %}
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <h4>Résultat de l'Horodatage</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Informations sur la donnée</h5>
+                    <p><strong>Description :</strong> {{ timestamp_details.description }}</p>
+                    {% if timestamp_details.filename %}
+                    <p><strong>Fichier :</strong> {{ timestamp_details.filename }}</p>
+                    {% endif %}
+                    <p><strong>Algorithme de hachage :</strong> {{ timestamp_details.hash_algorithm }}</p>
+                    <p><strong>Valeur du hash :</strong> <span class="text-monospace">{{ timestamp_details.hash_value }}</span></p>
+                </div>
+                <div class="col-md-6">
+                    <h5>Informations d'horodatage</h5>
+                    <p><strong>Date et heure (UTC) :</strong> {{ timestamp_details.timestamp }}</p>
+                    <p><strong>Type d'horodatage :</strong> 
+                        <span class="badge bg-info">Simulation Cryptographique</span>
+                    </p>
+                    
+                    {% if timestamp_details.tsa_note %}
+                    <div class="alert alert-info">
+                        <strong>Information technique :</strong>
+                        <pre class="small text-info">{{ timestamp_details.tsa_note }}</pre>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <h5>Jeton d'horodatage</h5>
+                <div class="form-group">
+                    <label for="tsa-token">Jeton (pour vérification future) :</label>
+                    <textarea class="form-control text-monospace small" id="tsa-token" rows="6" readonly>{{ timestamp_details.tsa_token }}</textarea>
+                </div>
+                <button class="btn btn-sm btn-secondary mt-2" onclick="copyToClipboard('tsa-token')">
+                    <i class="fa fa-copy"></i> Copier le jeton
+                </button>
+                
+                <div class="alert alert-info mt-3">
+                    <strong>Information :</strong> Ce jeton est cryptographiquement sécurisé et peut être vérifié par notre service.
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <h5>Rapport d'horodatage</h5>
+                {% if timestamp_details.id %}
+                <a href="{{ url_for('generate_timestamp_pdf', timestamp_id=timestamp_details.id) }}" class="btn btn-primary">
+                    <i class="fa fa-file-pdf"></i> Générer un PDF de certification
+                </a>
+                <a href="{{ url_for('download_timestamp_token', timestamp_id=timestamp_details.id) }}" class="btn btn-secondary">
+                    <i class="fa fa-download"></i> Télécharger le jeton
+                </a>
+                <a href="{{ url_for('verify_timestamp') }}" class="btn btn-info">
+                    <i class="fa fa-check-circle"></i> Vérifier ce jeton
+                </a>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="fa fa-info-circle"></i> Vos liens de téléchargement seront disponibles après l'enregistrement de l'horodatage.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4>Horodater une donnée</h4>
+        </div>
+        <div class="card-body">
+            <form action="{{ url_for('timestamp_service_action') }}" method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="data_text" class="form-label">Texte à horodater :</label>
+                    <textarea class="form-control" id="data_text" name="data_text" rows="4" placeholder="Entrez le texte que vous souhaitez horodater..."></textarea>
+                    <div class="form-text">Ou alternativement, téléversez un fichier ci-dessous.</div>
+                </div>
+                <div class="mb-3">
+                    <label for="data_file" class="form-label">Fichier à horodater :</label>
+                    <input type="file" class="form-control" id="data_file" name="data_file">
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-clock"></i> Horodater
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="card mt-4">
+        <div class="card-header bg-info text-white">
+            <h4>À propos de l'horodatage cryptographique</h4>
+        </div>
+        <div class="card-body">
+            <p>L'horodatage cryptographique est un service qui permet de prouver qu'une donnée numérique existait à un moment précis dans le temps.</p>
+            
+            <h5>Comment ça marche ?</h5>
+            <ol>
+                <li>Vous soumettez du texte ou un fichier à notre service</li>
+                <li>Nous calculons une empreinte numérique (hash) de cette donnée</li>
+                <li>Cette empreinte est combinée avec un horodatage précis</li>
+                <li>Le tout est cryptographiquement signé avec notre clé privée</li>
+                <li>Vous recevez un jeton qui prouve l'existence de la donnée à ce moment</li>
+            </ol>
+            
+            <h5>Applications courantes</h5>
+            <ul>
+                <li>Preuve de propriété intellectuelle</li>
+                <li>Certification de l'existence d'un document avant une date limite</li>
+                <li>Archivage légal</li>
+                <li>Workflows de signature électronique</li>
+            </ul>
+            
+            <div class="alert alert-info mt-3">
+                <i class="fa fa-info-circle"></i> Vous pouvez également <a href="{{ url_for('verify_timestamp') }}" class="alert-link">vérifier l'authenticité d'un jeton d'horodatage</a> que vous avez déjà reçu.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToClipboard(elementId) {
+    var copyText = document.getElementById(elementId);
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
+    document.execCommand("copy");
+    
+    // Alert the copied text
+    alert("Jeton copié dans le presse-papier");
+}
+</script>
+{% endblock %}

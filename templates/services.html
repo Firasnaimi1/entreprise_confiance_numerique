@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrustSecure Solutions</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>TrustSecure Solutions</h1>
+    </header>
+    <nav>
+        <a href="{{ url_for('index') }}">Accueil</a>
+        <a href="{{ url_for('services') }}">Nos Services</a>
+        {% if session.username %}
+            <a href="{{ url_for('dashboard') }}">Tableau de Bord</a>
+            <a href="{{ url_for('logout') }}">Déconnexion ({{ session.name }})</a>
+        {% else %}
+            <a href="{{ url_for('login') }}">Connexion</a>
+        {% endif %}
+    </nav>
+
+    <div class="container">
+        <h2 class="page-title">Découvrez Nos Services de Confiance</h2>
+        {% if services %}
+            <div class="service-list">
+                {% for service in services %}
+                    <div class="service-item">
+                        <h3>{{ service.name }}</h3>
+                        <p>{{ service.description }}</p>
+                        <a href="{{ service.details_url }}" class="btn-details">En savoir plus</a>
+                        {% if service.interactive_url %}
+                            <a href="{{ service.interactive_url }}" class="btn-details" style="margin-left: 5px; background-color: #28a745; border-color: #28a745;">Utiliser le service</a>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>Aucun service disponible pour le moment. Veuillez revenir plus tard.</p>
+        {% endif %}
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Services de Confiance Numérique. Tous droits réservés.</p>
+    </footer>
+</body>
+</html>

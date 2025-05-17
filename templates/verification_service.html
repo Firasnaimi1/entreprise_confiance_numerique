@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>TrustSecure Solutions - Mon Entreprise</title>
+-     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+-     <style>
+-         body { font-family: sans-serif; margin: 0; background-color: #f4f4f4; color: #333; }
+-         .navbar {
+-             background-color: #0056b3;
+-             padding: 1rem;
+-             border-bottom: #004085 3px solid;
+-         }
+-         .navbar a, .navbar .navbar-brand {
+-             color: white;
+-             margin-right: 15px;
+-             text-decoration: none;
+-         }
+-         .navbar a:hover, .navbar .navbar-brand:hover {
+-             color: #ddd;
+-         }
+-         .container {
+-             padding: 20px;
+-             background-color: white;
+-             margin-top: 20px;
+-             border-radius: 8px;
+-             box-shadow: 0 0 10px rgba(0,0,0,0.1);
+-         }
+-         .footer {
+-             text-align: center;
+-             padding: 20px;
+-             margin-top: 30px;
+-             background-color: #333;
+-             color: white;
+-         }
+-         .btn-primary {
+-             background-color: #0056b3;
+-             border-color: #0056b3;
+-         }
+-         .btn-primary:hover {
+-             background-color: #004085;
+-             border-color: #00376e;
+-         }
+-         .alert {
+-             margin-top: 20px;
+-         }
+-         textarea {
+-             word-break: break-all;
+-         }
+-     </style>
++     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand" href="{{ url_for('index') }}">TrustSecure Solutions</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}">Accueil</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('services') }}">Nos Services</a></li>
+                {% if session.username %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}">Tableau de Bord</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Déconnexion</a></li>
+                {% else %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Connexion</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Service de Vérification de Signature Électronique</h1>
+        <p>Téléversez le document original, la signature (en format hexadécimal) et la clé publique (en format PEM) pour vérifier l'authenticité de la signature.</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if verification_result is defined %}
+            {% if verification_result.valid %}
+                <div class="alert alert-success mt-3">
+                    <h4>Résultat de la Vérification : Signature Valide</h4>
+                    <p>Le document et la signature correspondent à la clé publique fournie.</p>
+                    <p><strong>Fichier :</strong> {{ verification_result.filename }}</p>
+                    <p><strong>Empreinte du document (SHA256) :</strong> <small>{{ verification_result.document_hash }}</small></p>
+                </div>
+            {% else %}
+                <div class="alert alert-danger mt-3">
+                    <h4>Résultat de la Vérification : Signature Invalide</h4>
+                    <p>{{ verification_result.error_message | default('La signature ne correspond pas au document et à la clé publique fournis, ou une erreur est survenue lors de la vérification.') }}</p>
+                     {% if verification_result.filename %}
+                        <p><strong>Fichier :</strong> {{ verification_result.filename }}</p>
+                     {% endif %}
+                </div>
+            {% endif %}
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('verification_service_action') }}" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="document">Choisir le document original (PDF, DOCX):</label>
+                <input type="file" class="form-control-file" id="document" name="document" accept=".pdf,.docx,.txt,.md" required>
+            </div>
+            <div class="form-group">
+                <label for="signature_hex">Signature (Hexadécimal) :</label>
+                <textarea class="form-control" id="signature_hex" name="signature_hex" rows="5" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="public_key_pem">Clé Publique (Format PEM) :</label>
+                <textarea class="form-control" id="public_key_pem" name="public_key_pem" rows="10" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Vérifier la signature</button>
+        </form>
+        <hr>
+        <a href="{{ url_for('services') }}" class="btn btn-secondary">Retour aux services</a>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2024 Mon Entreprise de Confiance Numérique. Tous droits réservés.</p>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

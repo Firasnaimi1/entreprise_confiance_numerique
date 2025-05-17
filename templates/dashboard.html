@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de Bord - Services de Confiance Numérique</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>TrustSecure Solutions</h1>
+    </header>
+    <nav>
+        <a href="{{ url_for('index') }}">Accueil</a>
+        <a href="{{ url_for('services') }}">Nos Services</a>
+        {% if session.username %}
+            <a href="{{ url_for('dashboard') }}">Tableau de Bord</a>
+            <a href="{{ url_for('logout') }}">Déconnexion ({{ session.name }})</a>
+        {% else %}
+            <a href="{{ url_for('login') }}">Connexion</a>
+        {% endif %}
+    </nav>
+
+    <div class="container">
+        <div class="dashboard-content">
+            <h2>Bienvenue sur votre tableau de bord, {{ name }} !</h2>
+            <p>C'est ici que vous pourrez gérer vos services et informations personnelles.</p>
+            <p>Pour l'instant, cette section est en cours de développement. Revenez bientôt pour découvrir de nouvelles fonctionnalités !</p>
+            <a href="{{ url_for('services') }}" class="btn">Explorer nos services</a>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Services de Confiance Numérique. Tous droits réservés.</p>
+    </footer>
+</body>
+</html>

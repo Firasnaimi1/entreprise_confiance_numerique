@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Coffre Fort Numérique{% endblock %}
+{% block content %}
+<div class="service-container">
+    <h1>Coffre Fort Numérique</h1>
+    <p class="service-description">Cette page permet de stocker et gérer vos documents importants en toute sécurité.</p>
+
+    <div class="action-panel">
+        <h2>Téléverser un document sécurisé</h2>
+        <form action="{{ url_for('safe_service_action') }}" method="post" enctype="multipart/form-data" class="service-form">
+            <div class="form-group">
+                <label for="safe_document">Sélectionnez le document à stocker :</label>
+                <input type="file" id="safe_document" name="safe_document" required>
+            </div>
+
+            <!-- Dans un vrai scénario, vous ajouteriez ici des options de chiffrement -->
+
+            <button type="submit" class="btn-primary">Stocker le document</button>
+        </form>
+    </div>
+
+    <div class="results-panel">
+        <h2>Vos documents sécurisés</h2>
+        {% if documents %}
+            <ul class="result-list">
+            {% for doc in documents %}
+                <li class="result-item">
+                    <strong>Nom du fichier:</strong> {{ doc.filename }}<br>
+                    <strong>Stocké le:</strong> {{ doc.upload_date.strftime('%Y-%m-%d %H:%M:%S') }}<br>
+                    <strong>Hash original (SHA-256):</strong> {{ doc.original_hash }}<br>
+                    <a href="{{ url_for('download_safe_document', document_id=doc.id) }}" class="btn-download">Télécharger</a>
+                </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p class="no-results">Aucun document trouvé dans votre coffre-fort numérique.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

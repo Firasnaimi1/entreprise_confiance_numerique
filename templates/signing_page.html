@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Signature de Document{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h3>Processus de Signature: {{ process.title }}</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>Informations</h4>
+                    <p><strong>Document:</strong> {{ document.filename }}</p>
+                    <p><strong>Signataire:</strong> {{ signer.name }}</p>
+                    <p><strong>Rôle:</strong> {{ signer.role }}</p>
+                    <p><strong>Statut:</strong> 
+                        <span class="badge 
+                            {% if signer.status == 'pending' %}bg-warning{% endif %}
+                            {% if signer.status == 'signed' %}bg-success{% endif %}
+                            {% if signer.status == 'refused' %}bg-danger{% endif %}
+                        ">
+                            {{ signer.status }}
+                        </span>
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    {% if signer.status == 'signed' %}
+                    <div class="alert alert-success">
+                        <h4><i class="fa fa-check-circle"></i> Document déjà signé</h4>
+                        <p>Vous avez signé ce document le {{ signer.signature_date.strftime('%d/%m/%Y à %H:%M') }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if signer.status == 'pending' %}
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h4>Signature du Document</h4>
+        </div>
+        <div class="card-body">
+            <form action="{{ url_for('sign_document', token=signer.access_token) }}" method="post">
+                <div class="mb-3">
+                    <label for="signature-pad" class="form-label">Votre signature:</label>
+                    <div class="border rounded p-3">
+                        <canvas id="signature-pad" class="signature-pad" width="400" height="200"></canvas>
+                    </div>
+                    <input type="hidden" name="signature_image" id="signature_image">
+                    <div class="mt-2">
+                        <button type="button" class="btn btn-secondary" id="clear-signature">Effacer</button>
+                    </div>
+                </div>
+                
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="confirm-check" required>
+                    <label class="form-check-label" for="confirm-check">
+                        Je confirme avoir pris connaissance du document et j'accepte de le signer électroniquement.
+                    </label>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg" id="sign-button">
+                        <i class="fa fa-pen"></i> Signer le document
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if document_path %}
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h4>Aperçu du Document</h4>
+        </div>
+        <div class="card-body">
+            <div class="ratio ratio-16x9">
+                <iframe src="{{ url_for('static', filename='pdf.js/web/viewer.html') }}?file={{ document_path }}" 
+                        title="Document preview" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% if signer.status == 'pending' %}
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var canvas = document.getElementById('signature-pad');
+        var signaturePad = new SignaturePad(canvas, {
+            backgroundColor: 'rgb(255, 255, 255)',
+            penColor: 'rgb(0, 0, 0)'
+        });
+        
+        document.getElementById('clear-signature').addEventListener('click', function() {
+            signaturePad.clear();
+        });
+        
+        document.querySelector('form').addEventListener('submit', function(e) {
+            if (signaturePad.isEmpty()) {
+                e.preventDefault();
+                alert('Veuillez signer le document avant de continuer.');
+                return false;
+            }
+            
+            var dataURL = signaturePad.toDataURL();
+            document.getElementById('signature_image').value = dataURL;
+        });
+    });
+</script>
+{% endif %}
+{% endblock %} 

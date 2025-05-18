@@ -15,7 +15,7 @@ Une application Flask offrant une suite de services numériques de confiance, in
 
 ```bash
 # Cloner le dépôt
-git clone https://github.com/votre-username/trustsecure.git
+git clone https://github.com/Firasnaimi1/entreprise_confiance_numerique.git
 cd trustsecure
 
 # Créer un environnement virtuel
